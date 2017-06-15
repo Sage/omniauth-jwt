@@ -65,6 +65,8 @@ module OmniAuth
       def secret
         if options.secret.is_a?(String)
           options.secret
+        elsif options.secret.is_a?(Hash)
+          issuer_specific_secret
         else
           secret_lookup.secret
         end
@@ -76,6 +78,12 @@ module OmniAuth
 
       def uid_lookup
         @uid_lookup ||= options.uid_claim.new(request)
+      end
+
+      def issuer_specific_secret
+        unverified_token = ::JWT.decode(request.params['jwt'], nil, false)[0]
+        iss = unverified_token['iss']
+        options.secret[iss]
       end
     end
 

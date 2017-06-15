@@ -92,5 +92,17 @@ describe OmniAuth::Strategies::JWT do
         expect(last_response.status).to eq(302)
       end
     end
+
+    describe 'secret' do
+      context 'multiple issuers' do
+        let(:args) { [{ issuer_1: 'secret_1', issuer_2: 'secret_2' }, {auth_url: 'http://example.com/login'}] }
+
+        it 'should assign the uid' do
+          encoded = JWT.encode({name: 'Steve', email: 'dude@awesome.com', iss: 'issuer_1'}, 'secret_1')
+          get '/auth/jwt/callback?jwt=' + encoded
+          expect(response_json["uid"]).to eq('dude@awesome.com')
+        end
+      end
+    end
   end
 end
